@@ -1,0 +1,13 @@
+[package]
+name = "saphir-wasm-multithread-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.11"
+serde = "1.0"
+serde_derive = "1.0"
+mime = "0.3"
+log = "0.4"
+saphir = { version = "3", features = ["macro", "https", "file"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "sync", "time", "parking_lot", "macros"] }
