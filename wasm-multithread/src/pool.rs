@@ -73,7 +73,7 @@ impl WorkerPool {
         //   library, know what's going on?
         // * How do we not fetch a script N times? It internally then
         //   causes another script to get fetched N times...
-        let worker = Worker::new("./worker.js")?;
+        let worker = Worker::new("./wasm-multithread/worker.js")?;
 
         // With a worker spun up send it the module/memory so it can start
         // instantiating the wasm module. Later it might receive further

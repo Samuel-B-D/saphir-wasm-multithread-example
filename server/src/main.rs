@@ -1,18 +1,13 @@
-use saphir::{file::middleware::FileMiddlewareBuilder, http::{HeaderName, HeaderValue}, prelude::*};
+use saphir::{file::middleware::{FileMiddleware, FileMiddlewareBuilder}, http::{HeaderName, HeaderValue}, prelude::*};
 use log::info;
 
 #[tokio::main]
 async fn main() -> Result<(), SaphirError> {
     env_logger::init();
 
-    let mut file_middleware_builder = FileMiddlewareBuilder::new("/", "../www");
-    #[cfg(debug_assertions)]
-    {
-        // We disable the build-in file cache for development
-        file_middleware_builder = file_middleware_builder.max_capacity(0).max_file_size(0);
-        info!("Running with file cache disabled for development...");
-    }
-    let file_middleware = file_middleware_builder.build()?;
+    let www_file_middleware = file_middleware("/", "../www")?;
+    let wasm_multithread_file_middleware = file_middleware("wasm-multithread", "../wasm-multithread/pkg")?;
+
     let port = 3000;
     let server = Server::builder()
         .configure_listener(|l| l
@@ -21,12 +16,24 @@ async fn main() -> Result<(), SaphirError> {
             .request_timeout(None)
         )
         .configure_middlewares(|m| m
-            .apply(file_middleware, vec!["/"], None)
-            .apply(WasmMultithreadMiddleware::new(), vec!["/"], None)
+            .apply(www_file_middleware, vec!["/"], None)
+            .apply(wasm_multithread_file_middleware, vec!["/wasm-multithread/"], None)
+            .apply(WasmMultithreadMiddleware::new(), vec!["/wasm-multithread/"], None)
         )
         .build();
 
     server.run().await
+}
+
+fn file_middleware(base_path: &str, www_path: &str) -> Result<FileMiddleware, SaphirError> {
+    let mut file_middleware_builder = FileMiddlewareBuilder::new(base_path, www_path);
+    #[cfg(debug_assertions)]
+    {
+        // We disable the build-in file cache for development
+        file_middleware_builder = file_middleware_builder.max_capacity(0).max_file_size(0);
+        info!("Running with file cache disabled for development...");
+    }
+    file_middleware_builder.build()
 }
 
 struct WasmMultithreadMiddleware
