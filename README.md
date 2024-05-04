@@ -17,7 +17,7 @@ $ cargo install -f wasm-pack
 
 ```sh
 $ cd wasm-multithread
-$ wasm-pack build --target no-modules -d ../www/wasm-multithread
+$ wasm-pack build --target no-modules -d lib/pkg
 ```
 
 ## Run server

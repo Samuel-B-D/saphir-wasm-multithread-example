@@ -2,7 +2,7 @@
 name = "wasm-multithread"
 version = "0.1.0"
 authors = ["The wasm-bindgen Developers"]
-edition = "2018"
+edition = "2021"
 rust-version = "1.57"
 
 [lib]

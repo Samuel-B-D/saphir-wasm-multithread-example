@@ -5,8 +5,13 @@ use log::info;
 async fn main() -> Result<(), SaphirError> {
     env_logger::init();
 
+    #[cfg(debug_assertions)]
+    {
+        // We disable the build-in file cache for development
+        info!("Running with file cache disabled for development...");
+    }
     let www_file_middleware = file_middleware("/", "../www")?;
-    let wasm_multithread_file_middleware = file_middleware("wasm-multithread", "../wasm-multithread/pkg")?;
+    let wasm_multithread_file_middleware = file_middleware("wasm-multithread", "../wasm-multithread/lib")?;
 
     let port = 3000;
     let server = Server::builder()
@@ -18,7 +23,7 @@ async fn main() -> Result<(), SaphirError> {
         .configure_middlewares(|m| m
             .apply(www_file_middleware, vec!["/"], None)
             .apply(wasm_multithread_file_middleware, vec!["/wasm-multithread/"], None)
-            .apply(WasmMultithreadMiddleware::new(), vec!["/wasm-multithread/"], None)
+            .apply(WasmMultithreadMiddleware::new(), vec!["/"], None)
         )
         .build();
 
@@ -31,7 +36,6 @@ fn file_middleware(base_path: &str, www_path: &str) -> Result<FileMiddleware, Sa
     {
         // We disable the build-in file cache for development
         file_middleware_builder = file_middleware_builder.max_capacity(0).max_file_size(0);
-        info!("Running with file cache disabled for development...");
     }
     file_middleware_builder.build()
 }

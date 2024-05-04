@@ -10,15 +10,16 @@ const ctx = canvas.getContext('2d');
 button.disabled = true;
 concurrency.disabled = true;
 
+let rendering = null;
+let start = null;
+let interval = null;
+let pool = null;
+
 run();
 
 async function run() {
   const { Scene, WorkerPool, Pool } = await window.loadWasmMultithread();
-
-  // The maximal concurrency of our web worker pool is `hardwareConcurrency`,
-  // so set that up here and this ideally is the only location we create web
-  // workers.
-  pool = new WorkerPool(navigator.hardwareConcurrency);
+  pool = Pool;
 
   // Configure various buttons and such.
   button.onclick = function() {
@@ -48,11 +49,6 @@ async function run() {
   concurrency.oninput();
   concurrency.disabled = false;
 }
-
-let rendering = null;
-let start = null;
-let interval = null;
-let pool = null;
 
 class State {
   constructor(wasm) {
